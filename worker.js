@@ -100,8 +100,6 @@ export default {
     }
 
     const url = new URL(request.url);
-
-    // Route /image - DALL-E 3
     if (url.pathname === "/image") {
       try {
         const body = await request.json();
@@ -122,7 +120,7 @@ export default {
           );
         }
 
-        const size = formato === "Story" ? "1024x1792" : "1024x1024";
+        const size = formato === "Story" ? "1024x1536" : "1024x1024";
 
         const dalleResponse = await fetch("https://api.openai.com/v1/images/generations", {
           method: "POST",
@@ -131,11 +129,11 @@ export default {
             "Authorization": "Bearer " + env.OPENAI_API_KEY,
           },
           body: JSON.stringify({
-            model: "dall-e-3",
+            model: "gpt-image-1",
             prompt: prompt,
             n: 1,
             size: size,
-            quality: "hd",
+            quality: "high",
           }),
         });
 
@@ -143,13 +141,15 @@ export default {
 
         if (!dalleResponse.ok) {
           return new Response(
-            JSON.stringify({ error: "Erro DALL-E " + dalleResponse.status + ": " + dalleText }),
+            JSON.stringify({ error: "Erro OpenAI " + dalleResponse.status + ": " + dalleText }),
             { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
         const dalleData = JSON.parse(dalleText);
-        const imageUrl = dalleData.data && dalleData.data[0] ? dalleData.data[0].url : null;
+        // gpt-image-1 retorna sempre base64 no campo b64_json
+        const item = dalleData.data && dalleData.data[0] ? dalleData.data[0] : null;
+        const imageUrl = item ? (item.url || ("data:image/png;base64," + item.b64_json)) : null;
 
         return new Response(
           JSON.stringify({ imageUrl: imageUrl }),
