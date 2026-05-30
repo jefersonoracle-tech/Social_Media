@@ -50,6 +50,14 @@
     .carousel-qty{display:none;margin-top:10px}
     .carousel-qty.visible{display:flex;flex-direction:column;gap:5px}
 
+    /* Custom publico dropdown */
+    .publico-wrap{position:relative}
+    .publico-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1a1a24;border:1px solid var(--border);border-radius:8px;z-index:100;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+    .publico-list.open{display:block}
+    .publico-opt{padding:10px 13px;font-size:13px;color:var(--text);cursor:pointer;transition:background .15s}
+    .publico-opt:hover{background:rgba(232,0,28,.08);color:var(--accent)}
+    .publico-opt.hidden{display:none}
+
     /* File upload */
     .file-area{
       border:1.5px dashed var(--border);border-radius:8px;padding:18px;
@@ -123,10 +131,10 @@
     .copy-section-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--border);border-radius:6px;padding:4px 11px;margin-bottom:12px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .2s}
     .copy-section-btn:hover{border-color:var(--accent);color:var(--accent)}
     .copy-section-btn.ok{border-color:var(--ok);color:var(--ok)}
-    .prompt-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px;color:#c8c8dc;line-height:1.7;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
+    .prompt-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px;color:#c8c8dc;line-height:1.7;margin-bottom:10px;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto}
     .prompt-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-    .legenda-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:14px;color:#d0d0e0;line-height:1.8;white-space:pre-wrap;word-break:break-word}
-    .musica-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:14px;color:#d0d0e0;line-height:1.9;white-space:pre-wrap;word-break:break-word}
+    .legenda-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:14px;color:#d0d0e0;line-height:1.8;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto}
+    .musica-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:14px;color:#d0d0e0;line-height:1.9;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto}
     .tema-text{font-size:14px;color:#c0c0d8;line-height:1.7;padding:4px 0}
 
     /* Config notice */
@@ -174,16 +182,18 @@
       <!-- Público-alvo com sugestões -->
       <div class="fg full">
         <label for="publico">Público-alvo <span class="req">*</span></label>
-        <input type="text" id="publico" list="publico-list" placeholder="Selecione ou digite..."/>
-        <datalist id="publico-list">
-          <option value="Fãs brasileiros de F1, 20–40 anos"></option>
-          <option value="Entusiastas de automobilismo, 18–35 anos"></option>
-          <option value="Jovens apaixonados por esportes a motor, 16–28 anos"></option>
-          <option value="Colecionadores e nostálgicos da F1, 35–55 anos"></option>
-          <option value="Mulheres fãs de F1, 20–35 anos"></option>
-          <option value="Público geral curioso sobre F1, 18–45 anos"></option>
-          <option value="Gamers e fãs de F1 (F1 24, simuladores), 16–30 anos"></option>
-        </datalist>
+        <div class="publico-wrap" id="publicoWrap">
+          <input type="text" id="publico" placeholder="Selecione ou digite..." autocomplete="off" oninput="filterPublico(this.value)" onfocus="showPublicoList()" onblur="hidePublicoListDelay()"/>
+          <div class="publico-list" id="publicoList">
+            <div class="publico-opt" onmousedown="selectPublico(this)">Fãs brasileiros do nicho/tema, 20-40 anos</div>
+            <div class="publico-opt" onmousedown="selectPublico(this)">Entusiastas do nicho/tema, 18-35 anos</div>
+            <div class="publico-opt" onmousedown="selectPublico(this)">Jovens apaixonados pelo tema, 16-28 anos</div>
+            <div class="publico-opt" onmousedown="selectPublico(this)">Colecionadores e nostálgicos, 35-55 anos</div>
+            <div class="publico-opt" onmousedown="selectPublico(this)">Mulheres fãs do nicho/tema, 20-35 anos</div>
+            <div class="publico-opt" onmousedown="selectPublico(this)">Gamers fãs do nicho/tema, 16-30 anos</div>
+            <div class="publico-opt" onmousedown="selectPublico(this)">Público geral curioso</div>
+          </div>
+        </div>
       </div>
 
       <!-- Tom de voz -->
@@ -298,6 +308,26 @@ const wInput = document.getElementById('workerUrl');
 const saved = localStorage.getItem('workerUrl');
 if (saved) wInput.value = saved;
 wInput.addEventListener('change', () => localStorage.setItem('workerUrl', wInput.value.trim()));
+
+// ── Custom publico dropdown ───────────────────────────────────
+function showPublicoList() {
+  document.getElementById('publicoList').classList.add('open');
+}
+function hidePublicoListDelay() {
+  setTimeout(() => document.getElementById('publicoList').classList.remove('open'), 150);
+}
+function selectPublico(el) {
+  document.getElementById('publico').value = el.textContent;
+  document.getElementById('publicoList').classList.remove('open');
+}
+function filterPublico(val) {
+  const list = document.getElementById('publicoList');
+  list.classList.add('open');
+  const q = val.toLowerCase();
+  list.querySelectorAll('.publico-opt').forEach(o => {
+    o.classList.toggle('hidden', q && !o.textContent.toLowerCase().includes(q));
+  });
+}
 
 // ── Carousel qty options ──────────────────────────────────────
 const qtdSelect = document.getElementById('qtdItens');
@@ -456,9 +486,11 @@ function renderSections(sections) {
         <span class="section-chevron open">▾</span>
       </div>
       <div class="section-body open">
-        <button class="copy-section-btn" onclick="copySec(this,${JSON.stringify(s.content)})">⎘ Copiar ${s.label.toLowerCase()}</button>
+        <button class="copy-section-btn" onclick="copySec(this)">⎘ Copiar ${s.label.toLowerCase()}</button>
         ${bodyHTML}
       </div>`;
+    // Store content safely as data attribute
+    div.querySelector('.copy-section-btn').dataset.content = s.content;
     container.appendChild(div);
   });
 }
@@ -499,7 +531,8 @@ function copyAll() {
   });
 }
 
-function copySec(btn, text) {
+function copySec(btn) {
+  const text = btn.dataset.content || '';
   navigator.clipboard.writeText(text).then(() => {
     const orig = btn.textContent;
     btn.textContent = '✓ Copiado!'; btn.classList.add('ok');
