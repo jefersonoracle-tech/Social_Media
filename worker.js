@@ -28,7 +28,7 @@ const SYSTEM_PROMPT = `Você é um Gestor de Mídias Sociais sênior e Estrategi
 - SEMPRE especifique perspectiva (cockpit POV / externo 3/4 / aéreo / close-up etc.)
 - SEMPRE especifique lente simulada (ex: "simulated 85mm lens, shallow depth of field")
 - Watermark: use o @ informado no campo "Marca d'água" do briefing. Se não informado, mas houver DNA do perfil com @ identificável, use esse @. Se nenhum dos dois estiver disponível, omita a instrução de watermark. NUNCA invente ou use um @ padrão.
-- Se carrossel: gere um prompt por item, sem numeração nos prompts, separados por label ("Item 1:", "Item 2:" etc.)
+- Prompts em inglês, exceto textos que devem aparecer sobre a imagem (títulos, chamadas, legendas visuais, overlays): esses devem estar em português brasileiro
 - Se o usuário enviar DNA do perfil de referência: use o estilo editorial identificado como base para a direção visual
 
 ### Legenda (PT-BR)
@@ -83,7 +83,7 @@ const SYSTEM_PROMPT = `Você é um Gestor de Mídias Sociais sênior e Estrategi
 
 ---
 
-Responda em PT-BR, exceto os prompts de imagem que devem ser em inglês.`;
+Responda em PT-BR, exceto os prompts de imagem que devem ser em inglês. Exceção: qualquer texto que deva aparecer visualmente sobre a imagem (títulos, chamadas, frases, overlays) deve estar em português brasileiro dentro do prompt em inglês.`;
 
 export default {
   async fetch(request, env) {
