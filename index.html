@@ -227,10 +227,10 @@
         </div>
       </div>
 
-      <!-- Perfil de referência -->
+      <!-- Marca d'água -->
       <div class="fg full">
-        <label for="perfil">Perfil de referência (opcional)</label>
-        <input type="text" id="perfil" placeholder="Ex: @f1 ou @alphataurif1"/>
+        <label for="marcaDagua">Deseja adicionar marca d'água?</label>
+        <input type="text" id="marcaDagua" placeholder="Ex: @adrena.grid — deixe em branco para omitir"/>
       </div>
 
     </div>
@@ -385,7 +385,7 @@ async function generate() {
   const publico  = document.getElementById('publico').value.trim();
   const tom      = document.getElementById('tom').value;
   const formato  = document.getElementById('formato').value;
-  const perfil   = document.getElementById('perfil').value.trim();
+  const marcaDagua = document.getElementById('marcaDagua').value.trim();
   const tomVisual = document.querySelector('input[name="tomVisual"]:checked')?.value || '';
   const qtdItens = document.getElementById('qtdItens').value;
 
@@ -404,7 +404,7 @@ async function generate() {
   document.getElementById('btnGen').disabled = true;
 
   try {
-    const payload = { nicho, publico, tom, tomVisual, formato, qtdItens, perfil };
+    const payload = { nicho, publico, tom, tomVisual, formato, qtdItens, marcaDagua };
 
     // Attach DNA file if present
     if (fileData) {
