@@ -129,7 +129,7 @@ export default {
             "Authorization": "Bearer " + env.OPENAI_API_KEY,
           },
           body: JSON.stringify({
-            model: "gpt-image-1",
+            model: "gpt-image-2",
             prompt: prompt,
             n: 1,
             size: size,
