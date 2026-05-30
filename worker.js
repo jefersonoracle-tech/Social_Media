@@ -100,6 +100,48 @@ export default {
       return new Response("Método não permitido", { status: 405, headers: corsHeaders });
     }
 
+    const url = new URL(request.url);
+
+    // ── Rota /image — gera imagem via DALL-E 3 ──────────────────
+    if (url.pathname === "/image") {
+      try {
+        const { prompt, formato } = await request.json();
+        if (!prompt) return new Response(JSON.stringify({ error: "Prompt ausente." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+        const size = formato === "Story" ? "1024x1792" : "1024x1024";
+
+        const dalleResponse = await fetch("https://api.openai.com/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "dall-e-3",
+            prompt,
+            n: 1,
+            size,
+            quality: "hd",
+            response_format: "url",
+          }),
+        });
+
+        if (!dalleResponse.ok) {
+          const err = await dalleResponse.text();
+          return new Response(JSON.stringify({ error: `Erro DALL-E: ${err}` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const dalleData = await dalleResponse.json();
+        const imageUrl = dalleData.data?.[0]?.url || null;
+
+        return new Response(JSON.stringify({ imageUrl }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      } catch (err) {
+        return new Response(JSON.stringify({ error: `Erro interno: ${err.message}` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
+    // ── Rota padrão / — gera texto via Claude ──────────────────
     try {
       const body = await request.json();
       const { nicho, publico, tom, tomVisual, formato, qtdItens, marcaDagua, dna } = body;
@@ -158,47 +200,8 @@ export default {
       const data = await anthropicResponse.json();
       const result = data.content?.[0]?.text || "Sem resposta.";
 
-      // ── Gerar imagem via DALL-E 3 apenas para Story e Post único ──
-      const gerarImagem = formato === "Story" || formato === "Post único - Feed";
-      let imageUrl = null;
-
-      if (gerarImagem && env.OPENAI_API_KEY) {
-        // Extrair o prompt do resultado
-        const promptMatch = result.match(/\*\*Prompt:\*\*\s*([\s\S]*?)(?=\n---|\n##|$)/i);
-        const imagePrompt = promptMatch ? promptMatch[1].trim() : null;
-
-        if (imagePrompt) {
-          const size = formato === "Story" ? "1024x1792" : "1024x1024";
-
-          try {
-            const dalleResponse = await fetch("https://api.openai.com/v1/images/generations", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
-              },
-              body: JSON.stringify({
-                model: "dall-e-3",
-                prompt: imagePrompt,
-                n: 1,
-                size,
-                quality: "hd",
-                response_format: "url",
-              }),
-            });
-
-            if (dalleResponse.ok) {
-              const dalleData = await dalleResponse.json();
-              imageUrl = dalleData.data?.[0]?.url || null;
-            }
-          } catch (_) {
-            // Falha silenciosa — retorna o resultado textual normalmente
-          }
-        }
-      }
-
       return new Response(
-        JSON.stringify({ result, imageUrl }),
+        JSON.stringify({ result }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
 
