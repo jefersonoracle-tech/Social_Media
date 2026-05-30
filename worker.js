@@ -204,6 +204,31 @@ export default {
 
       userMessage += "\n\nGere o prompt de imagem, a legenda para Instagram e a sugestao musical.";
 
+      // Build message content — support multiple DNA images
+      let messageContent;
+      const dnaImages = body.dnaImages ? JSON.parse(body.dnaImages) : null;
+
+      if (dnaImages && dnaImages.images && dnaImages.images.length > 0) {
+        const imgType = dnaImages.type || "image/jpeg";
+        messageContent = [
+          ...dnaImages.images.map((b64) => ({
+            type: "image",
+            source: { type: "base64", media_type: imgType, data: b64 }
+          })),
+          {
+            type: "text",
+            text: userMessage + "\n\nAs imagens acima sao prints do feed do perfil de referencia. Analise o estilo visual, paleta de cores, tipografia e composicao para usar como referencia editorial."
+          }
+        ];
+      } else if (body.dnaImage) {
+        messageContent = [
+          { type: "image", source: { type: "base64", media_type: body.dnaImageType || "image/jpeg", data: body.dnaImage } },
+          { type: "text", text: userMessage + "\n\nA imagem acima e um print do perfil de referencia. Use seu estilo visual como referencia editorial." }
+        ];
+      } else {
+        messageContent = userMessage;
+      }
+
       const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -215,7 +240,7 @@ export default {
           model: "claude-sonnet-4-6",
           max_tokens: 3000,
           system: SYSTEM_PROMPT,
-          messages: [{ role: "user", content: userMessage }],
+          messages: [{ role: "user", content: messageContent }],
         }),
       });
 
