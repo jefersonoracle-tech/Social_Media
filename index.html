@@ -137,9 +137,6 @@
     .musica-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:14px;color:#d0d0e0;line-height:1.9;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto}
     .tema-text{font-size:14px;color:#c0c0d8;line-height:1.7;padding:4px 0}
 
-    /* Config notice */
-    .config-note{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:12px;color:#a78bfa;display:flex;gap:8px;line-height:1.5}
-
     footer{margin-top:48px;text-align:center;color:var(--muted);font-size:11px}
 
     @media(max-width:520px){.grid{grid-template-columns:1fr}.card{padding:18px}.tone-grid{grid-template-columns:1fr 1fr}}
@@ -154,19 +151,7 @@
     <p class="subtitle">Preencha o briefing e receba o prompt de imagem,<br>legenda e sugestão musical gerados pela IA.</p>
   </header>
 
-  <div class="config-note">
-    <span>⚙</span>
-    <span>Cole a URL do seu Cloudflare Worker abaixo. É salva automaticamente no navegador.</span>
-  </div>
 
-  <!-- Worker config -->
-  <div class="card">
-    <div class="card-label">Configuração</div>
-    <div class="fg">
-      <label for="workerUrl">URL do Cloudflare Worker <span class="req">*</span></label>
-      <input type="url" id="workerUrl" placeholder="https://instagram-proxy.usuario.workers.dev"/>
-    </div>
-  </div>
 
   <!-- Briefing -->
   <div class="card">
@@ -303,11 +288,8 @@
 </div>
 
 <script>
-// ── Worker URL persist ────────────────────────────────────────
-const wInput = document.getElementById('workerUrl');
-const saved = localStorage.getItem('workerUrl');
-if (saved) wInput.value = saved;
-wInput.addEventListener('change', () => localStorage.setItem('workerUrl', wInput.value.trim()));
+// ── Worker URL (hardcoded) ────────────────────────────────────
+const WORKER_URL = 'https://instagram-proxy.jeferson-oracle.workers.dev/';
 
 // ── Custom publico dropdown ───────────────────────────────────
 function showPublicoList() {
@@ -380,7 +362,7 @@ async function onFileChange(input) {
 let lastRaw = '';
 
 async function generate() {
-  const workerUrl = wInput.value.trim();
+  const workerUrl = WORKER_URL;
   const nicho    = document.getElementById('nicho').value.trim();
   const publico  = document.getElementById('publico').value.trim();
   const tom      = document.getElementById('tom').value;
@@ -389,10 +371,7 @@ async function generate() {
   const tomVisual = document.querySelector('input[name="tomVisual"]:checked')?.value || '';
   const qtdItens = document.getElementById('qtdItens').value;
 
-  if (workerUrl) localStorage.setItem('workerUrl', workerUrl);
-
   const missing = [];
-  if (!workerUrl) missing.push('URL do Worker');
   if (!nicho)    missing.push('Nicho');
   if (!publico)  missing.push('Público-alvo');
   if (!tom)      missing.push('Tom de voz');
